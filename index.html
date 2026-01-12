@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Projects</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+        h1 { text-align: center; }
+        .project { background: #fff; padding: 15px; margin: 15px auto; max-width: 600px; border-radius: 8px; box-shadow: 0 0 5px #aaa; }
+        button { margin: 5px 0; padding: 5px 10px; }
+        .comments input { margin: 3px 3px 3px 0; padding: 5px; }
+        .comments ul { list-style: none; padding-left: 0; }
+        .comments li { background: #eee; margin: 3px 0; padding: 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>My Portfolio Projects</h1>
+
+    <div class="project" id="project-1">
+        <h2>Movie-Light – Movie Streaming Platform</h2>
+        <p>Secure, scalable streaming platform with AWS S3, NGINX, PHP, MySQL.</p>
+        <button onclick="touchProject(1)">View Project</button>
+        <div class="comments">
+            <input type="text" id="name-1" placeholder="Your Name">
+            <input type="text" id="comment-1" placeholder="Your Comment">
+            <button onclick="submitComment(1)">Submit Comment</button>
+            <ul id="comments-list-1"></ul>
+        </div>
+    </div>
+
+    <div class="project" id="project-2">
+        <h2>WeatherSnap – Weather Notifier</h2>
+        <p>Serverless weather alerts with Lambda, DynamoDB, and SNS.</p>
+        <button onclick="touchProject(2)">View Project</button>
+        <div class="comments">
+            <input type="text" id="name-2" placeholder="Your Name">
+            <input type="text" id="comment-2" placeholder="Your Comment">
+            <button onclick="submitComment(2)">Submit Comment</button>
+            <ul id="comments-list-2"></ul>
+        </div>
+    </div>
+
+<script>
+function touchProject(projectId){
+    fetch(`/api/touch/${projectId}`, { method: "POST" });
+}
+
+function submitComment(projectId){
+    const user_name = document.getElementById(`name-${projectId}`).value;
+    const comment = document.getElementById(`comment-${projectId}`).value;
+
+    fetch('/api/comment', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({user_name, comment, project_id: projectId})
+    }).then(()=> loadComments(projectId));
+}
+
+function loadComments(projectId){
+    fetch(`/api/comments/${projectId}`)
+    .then(res => res.json())
+    .then(data=>{
+        const list = document.getElementById(`comments-list-${projectId}`);
+        list.innerHTML = '';
+        data.forEach(c=>{
+            const li = document.createElement('li');
+            li.textContent = `${c.user_name}: ${c.comment}`;
+            list.appendChild(li);
+        });
+    });
+}
+
+// Load all comments on page load
+[1,2].forEach(pid => loadComments(pid));
+</script>
+
+</body>
+</html>
